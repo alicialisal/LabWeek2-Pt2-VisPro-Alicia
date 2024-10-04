@@ -28,38 +28,31 @@ const List<String> colors = [
   "\x1B[48;5;5m",   // Dark Magenta background
 ];
 
-// Move cursor to a specific position
+// utk pindahkan kursor ke posisi tertentu
 String moveCursor(int row, int col) => "\x1B[${row};${col}H";
 
-// Function to display fireworks animation
 Future<void> showFireworks(int i) async {
   stdout.write(hideCursor);
-  
-  // Dapatkan ukuran terminal dari dart_console
-  // final size = console
+
   int terminalHeight = console.windowHeight;
   int terminalWidth = console.windowWidth;
   int startRow = terminalHeight - 1, positionRow, positionCol;
 
   const int margin = 3;
-  final int maxCol = terminalWidth - margin; // Maximum column position considering margin
-  final int minColRow = margin; //
+  final int maxCol = terminalWidth - margin;
+  final int minColRow = margin;
   final int maxRow = terminalHeight - margin;
 
-  // Firework starts from the bottom and moves to the center
-  
-  if (i == 0)
-  {
+  // utk acak posisi firework tp yang pertama tetap di tengah
+  if (i == 0) {
     positionCol = terminalWidth ~/ 2;
     positionRow = terminalHeight ~/ 2;
-  }
-  else{
-    positionCol = minColRow + random.nextInt(maxCol - minColRow); // random position in terminal width with margin
+  } else {
+    positionCol = minColRow + random.nextInt(maxCol - minColRow);
     positionRow = minColRow + random.nextInt(maxRow - minColRow);
   }
 
-  
-  // Animate firework moving up
+  // utk kembang api sblm meledak (dari bawah ke atas)
   for (int row = startRow; row >= positionRow; row--) {
     stdout.write(clearScreen);
     stdout.write(moveCursor(row, positionCol));
@@ -67,98 +60,44 @@ Future<void> showFireworks(int i) async {
     await Future.delayed(Duration(milliseconds: 200));
   }
 
-  // Explosion
-
+  // firework meledak
   await Future.delayed(Duration(milliseconds: 200));
   var color = getRandomColor();
-  // stdout.write("${color}${clearScreen}${resetCursor}"); // Set background once and don't clear it again
 
-  // Step 1: Small Explosion (Single @ at the center)
-  stdout.write(moveCursor(positionRow, positionCol));
-  stdout.write("${color}@\x1B[0m");
-  await Future.delayed(Duration(milliseconds: 150));
+  // pola ledakan
+  List<List<String>> explosionPatterns = [
+    ["@", "", "", "", "", ""],
+    ["+", " +", "", "", "", ""],
+    ["*", "   *", "", "", "", ""],
+    ["o", "     o", "", "", "", ""],
+    ["x", "       x", "", "", "", ""]
+  ];
 
-  // Step 2: Medium Explosion (Diamond Pattern)
-  stdout.write(moveCursor(positionRow, positionCol));
-  stdout.write("${color}@\x1B[0m");
+  // loop untuk tampilkan ledakan dari kecil ke besar
+  for (int stage = 0; stage < explosionPatterns.length; stage++) {
+    if (stage == 0)
+      stdout.write("${color}${clearScreen}${resetCursor}");
 
-  stdout.write(moveCursor(positionRow - 1, positionCol));
-  stdout.write("${color}+ +\x1B[0m");
+    for (int offset = 0; offset <= stage; offset++) {
+      // bgian atas
+        stdout.write(moveCursor(positionRow - offset, positionCol - offset));
+        stdout.write("${color}${explosionPatterns[offset][0]}${explosionPatterns[offset][1]}\x1B[0m");
+      // bgian bwah
+        stdout.write(moveCursor(positionRow + offset, positionCol - offset));
+        stdout.write("${color}${explosionPatterns[offset][0]}${explosionPatterns[offset][1]}\x1B[0m");
+    }
+    await Future.delayed(Duration(milliseconds: 150));
+  }
 
-  stdout.write(moveCursor(positionRow - 2, positionCol - 1));
-  stdout.write("${color}*   *\x1B[0m");
-
-  stdout.write(moveCursor(positionRow + 1, positionCol));
-  stdout.write("${color}+ +\x1B[0m");
-
-  await Future.delayed(Duration(milliseconds: 150));
-
-  stdout.write("${color}${clearScreen}${resetCursor}"); // Set background once and don't clear it again
-
-  // Step 3: Larger Explosion (Expanded Diamond)
-  stdout.write(moveCursor(positionRow, positionCol));
-  stdout.write("${color}@\x1B[0m");
-
-  stdout.write(moveCursor(positionRow - 1, positionCol));
-  stdout.write("${color}+ +\x1B[0m");
-
-  stdout.write(moveCursor(positionRow - 2, positionCol - 1));
-  stdout.write("${color}*   *\x1B[0m");
-
-  stdout.write(moveCursor(positionRow - 3, positionCol - 2));
-  stdout.write("${color}o     o\x1B[0m");
-
-  stdout.write(moveCursor(positionRow + 1, positionCol));
-  stdout.write("${color}+ +\x1B[0m");
-
-  stdout.write(moveCursor(positionRow + 2, positionCol - 1));
-  stdout.write("${color}*   *\x1B[0m");
-
-  stdout.write(moveCursor(positionRow + 3, positionCol - 2));
-  stdout.write("${color}o     o\x1B[0m");
-
-  await Future.delayed(Duration(milliseconds: 150));
-
-  // Step 4: Full Explosion (Largest)
-  stdout.write(moveCursor(positionRow, positionCol));
-  stdout.write("${color}@\x1B[0m");
-
-  stdout.write(moveCursor(positionRow - 1, positionCol));
-  stdout.write("${color}+ +\x1B[0m");
-
-  stdout.write(moveCursor(positionRow - 2, positionCol - 1));
-  stdout.write("${color}*   *\x1B[0m");
-
-  stdout.write(moveCursor(positionRow - 3, positionCol - 2));
-  stdout.write("${color}o     o\x1B[0m");
-
-  stdout.write(moveCursor(positionRow - 4, positionCol - 3));
-  stdout.write("${color}x       x\x1B[0m");
-
-  stdout.write(moveCursor(positionRow + 1, positionCol));
-  stdout.write("${color}+ +\x1B[0m");
-
-  stdout.write(moveCursor(positionRow + 2, positionCol - 1));
-  stdout.write("${color}*   *\x1B[0m");
-
-  stdout.write(moveCursor(positionRow + 3, positionCol - 2));
-  stdout.write("${color}o     o\x1B[0m");
-
-  stdout.write(moveCursor(positionRow + 4, positionCol - 3));
-  stdout.write("${color}x       x\x1B[0m");
-
-  await Future.delayed(Duration(milliseconds: 200));
   stdout.write(clearScreen);
-
   await Future.delayed(Duration(milliseconds: 500));
-  stdout.write(showCursor); // Show the cursor again
+  stdout.write(showCursor);
 }
 
 Future<void> showHBDANO(int terminalWidth, int terminalHeight) async {
-  // Clear screen and set background to default
-  stdout.write("\x1B[2J\x1B[0m");
+  stdout.write(clearScreen);
 
-  // Define HBD ANO in a large size using stars
+  // tulisan habede
   List<String> hbdano = [
     "H     H  BBBBBB   DDDDD         A     N     N  ******",
     "H     H  B     B  D    D       A A    N N   N  *    *",
@@ -167,11 +106,11 @@ Future<void> showHBDANO(int terminalWidth, int terminalHeight) async {
     "H     H  BBBBBB   DDDDD     A       A N     N  ******"
   ];
 
-  // Center the text vertically
+  // kasih di tengah tulisannya
   int startRow = terminalHeight - 1;
   int positionCol = (terminalWidth ~/ 2) - (hbdano[0].length ~/ 2);
 
-  // Move the text upwards
+  // kasih gerak dari bawah ke atas
   for (int row = startRow; row >= 0; row--) {
     stdout.write(clearScreen);
     for (int i = 0; i < hbdano.length; i++) {
@@ -184,18 +123,16 @@ Future<void> showHBDANO(int terminalWidth, int terminalHeight) async {
     await Future.delayed(Duration(milliseconds: 200));
   }
 
-  // Clear the screen after the animation
-  stdout.write("\x1B[2J\x1B[0m");
+  stdout.write(clearScreen);
 }
 
-
-String getRandomColor() {
+String getRandomColor() { // fungsi utk acak warna
   return colors[random.nextInt(colors.length)];
 }
 
 void main() async {
-  stdout.write("Masukkan jumlah perulangan:");
-  int? ulang = int.parse(stdin.readLineSync()!); // null safety in name string
+  stdout.write("Masukkan jumlah perulangan: ");
+  int? ulang = int.parse(stdin.readLineSync()!);
 
   stdout.write(clearScreen);
   for (var i = 0; i < ulang; i++)
